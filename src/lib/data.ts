@@ -24,3 +24,13 @@ export async function fetchActivePasses(userId: string): Promise<UserPass[]> {
   if (error) throw error
   return (data ?? []) as UserPass[]
 }
+
+export const WHATSAPP_NUMBER = '5493416205777'
+export const WHATSAPP_DISPLAY = '341 620-5777'
+export const SEDES = [
+  { name: 'Pasco 144 - 1er piso', days: 'Lunes, miércoles y viernes', maps: 'https://www.google.com/maps/search/?api=1&query=Pasco+144+Rosario' },
+  { name: 'Catamarca 1515', days: 'Martes y jueves', maps: 'https://www.google.com/maps/search/?api=1&query=Catamarca+1515+Rosario' },
+]
+export function whatsappLink(text = 'Hola Bamboleo! Te escribo desde la app.') {
+  return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(text)}`
+}

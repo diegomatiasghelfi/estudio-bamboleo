@@ -1,5 +1,6 @@
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
-import { CalendarDays, Home, LogOut, ShieldCheck, ShoppingBag, Ticket } from 'lucide-react'
+import { CalendarDays, Home, ShieldCheck, ShoppingBag, Ticket } from 'lucide-react'
+import WhatsAppButton from './WhatsAppButton'
 import { useAuth } from '../context/AuthContext'
 
 const studentNav = [
@@ -10,10 +11,11 @@ const studentNav = [
 ]
 
 export default function Layout() {
-  const { profile, isAdmin, signOut } = useAuth()
+  const { profile, isAdmin, session } = useAuth()
   const location = useLocation()
   const nav = isAdmin ? [...studentNav, { to: '/admin', label: 'Admin', icon: ShieldCheck }] : studentNav
   const firstName = profile?.full_name?.split(' ')[0]
+  const initials = (profile?.full_name || session?.user.email || '?').split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase()
 
   return (
     <div className="mx-auto flex min-h-[100dvh] max-w-xl flex-col">
@@ -24,9 +26,9 @@ export default function Layout() {
           </NavLink>
           <div className="flex items-center gap-2">
             {firstName && <span className="text-sm text-cocoa-600">Hola, <b className="font-semibold">{firstName}</b></span>}
-            <button onClick={signOut} className="rounded-full p-2 text-cocoa-600 hover:bg-cream-100" aria-label="Cerrar sesión" title="Cerrar sesión">
-              <LogOut className="h-5 w-5" />
-            </button>
+            <NavLink to="/perfil" className="flex h-9 w-9 items-center justify-center rounded-full bg-gold text-sm font-semibold ring-2 ring-white" aria-label="Mi perfil" title="Mi perfil">
+              {initials}
+            </NavLink>
           </div>
         </div>
       </header>
@@ -34,6 +36,8 @@ export default function Layout() {
       <main key={location.pathname.split('/')[1]} className="flex-1 px-4 pb-28 pt-5">
         <Outlet />
       </main>
+
+      <WhatsAppButton />
 
       <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-cream-200 bg-white/95 backdrop-blur pb-safe">
         <div className="mx-auto flex max-w-xl">

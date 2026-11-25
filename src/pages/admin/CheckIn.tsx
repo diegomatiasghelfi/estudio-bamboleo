@@ -67,7 +67,7 @@ export default function CheckIn() {
               <header className="flex items-center justify-between gap-3 border-b border-cream-200 bg-cream-100/60 px-4 py-3">
                 <div>
                   <p className="font-serif text-lg font-semibold leading-tight">{c.title}</p>
-                  <p className="text-xs text-cocoa-400">{hhmm(c.start_time)} a {hhmm(c.end_time)} · {c.instructor}</p>
+                  <p className="text-xs text-cocoa-400">{hhmm(c.start_time)} a {hhmm(c.end_time)}{c.location ? ` · ${c.location}` : ''}</p>
                 </div>
                 <span className="text-sm font-semibold">{present}/{list.length}</span>
               </header>

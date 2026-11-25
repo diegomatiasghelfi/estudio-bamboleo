@@ -7,6 +7,7 @@ import { fetchActivePasses } from '../../lib/data'
 import type { Booking, PaymentRequest, UserPass } from '../../lib/types'
 import { DAY_NAMES, formatDate, fromISODate, hhmm, levelLabel, toISODate } from '../../lib/format'
 import { Badge, PageLoader } from '../../components/ui'
+import InstallApp from '../../components/InstallApp'
 
 export default function Dashboard() {
   const { profile, session } = useAuth()
@@ -159,6 +160,8 @@ export default function Dashboard() {
           <p>Tu pack vence pronto. Usá tus pases antes del {formatDate(main.expires_at)}.</p>
         </div>
       )}
+
+      <InstallApp />
     </div>
   )
 }

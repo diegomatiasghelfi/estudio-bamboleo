@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { AlertTriangle, CalendarCheck, Clock, User } from 'lucide-react'
+import { AlertTriangle, CalendarCheck, Clock, MapPin } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { useToast } from '../../context/ToastContext'
 import { supabase, errorMessage } from '../../lib/supabase'
@@ -83,7 +83,7 @@ export default function MyBookings() {
                     <Clock className="h-3.5 w-3.5" /> {formatDate(b.class_date)} · {hhmm(b.classes!.start_time)} a {hhmm(b.classes!.end_time)}
                   </p>
                   <p className="mt-0.5 flex items-center gap-1.5 text-xs text-cocoa-400">
-                    <User className="h-3.5 w-3.5" /> {b.classes!.instructor ?? 'Staff Bamboleo'} · {levelLabel(b.classes!.level)}
+                    <MapPin className="h-3.5 w-3.5" /> {b.classes!.location ?? 'Estudio Bamboleo'} · {levelLabel(b.classes!.level)}
                   </p>
                   {b.status === 'confirmed' && !started && (
                     <div className="mt-3 flex items-center justify-between gap-2">

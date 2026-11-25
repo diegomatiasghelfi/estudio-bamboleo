@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { CalendarX2, Clock, User, Users } from 'lucide-react'
+import { CalendarX2, Clock, MapPin, User, Users } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { useToast } from '../../context/ToastContext'
 import { supabase, errorMessage } from '../../lib/supabase'
@@ -138,6 +138,9 @@ export default function Classes() {
                         </div>
                         <div className="mt-3 flex items-center justify-between gap-3">
                           <div className="flex flex-col gap-1 text-xs text-cocoa-600">
+                            {slot.cls.location && (
+                              <span className="flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5" /> {slot.cls.location}</span>
+                            )}
                             {slot.cls.instructor && (
                               <span className="flex items-center gap-1.5"><User className="h-3.5 w-3.5" /> {slot.cls.instructor}</span>
                             )}

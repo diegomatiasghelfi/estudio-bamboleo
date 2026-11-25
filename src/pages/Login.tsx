@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react'
 import { Eye, EyeOff } from 'lucide-react'
 import { supabase, errorMessage } from '../lib/supabase'
 import { Spinner } from '../components/ui'
+import InstallApp from '../components/InstallApp'
 
 export default function Login() {
   const [mode, setMode] = useState<'login' | 'register'>('login')
@@ -109,6 +110,8 @@ export default function Login() {
             </button>
           </form>
         </div>
+
+        <InstallApp className="mt-4" />
       </div>
     </div>
   )

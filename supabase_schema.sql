@@ -54,8 +54,10 @@ create table if not exists public.classes (
   end_time      time not null,
   max_capacity  int  not null default 20 check (max_capacity > 0),
   active        boolean not null default true,
+  location      text,             -- sede
   check (end_time > start_time)
 );
+alter table public.classes add column if not exists location text;
 
 create table if not exists public.bookings (
   id            uuid primary key default gen_random_uuid(),
@@ -522,15 +524,23 @@ select v.* from (values
 ) as v(name, description, credits, price_ars, allowed_level, duration_days, sort_order)
 where not exists (select 1 from public.packs);
 
-insert into public.classes (title, rhythm, level, instructor, day_of_week, start_time, end_time, max_capacity)
+-- Grilla "Horarios 26'": Lu/Mié/Vie en Pasco 144 - 1er piso; Mar/Jue en Catamarca 1515
+insert into public.classes (title, rhythm, level, instructor, day_of_week, start_time, end_time, max_capacity, location)
 select v.* from (values
-  ('Salsa Desde Cero',   'Salsa',             'inicial', 'Staff Bamboleo', 1, time '19:00', time '20:00', 20),
-  ('Cha Cha Cha',        'Cha Cha Cha',       'general', 'Staff Bamboleo', 1, time '20:00', time '21:00', 20),
-  ('Vueltas en Pareja',  'Salsa',             'general', 'Staff Bamboleo', 2, time '19:30', time '20:30', 20),
-  ('Nivel Inicial',      'Salsa',             'inicial', 'Staff Bamboleo', 3, time '19:00', time '20:00', 20),
-  ('Afro',               'Afro',              'general', 'Staff Bamboleo', 4, time '20:00', time '21:00', 20),
-  ('Estilo Mujer',       'Salsa Estilo Mujer','general', 'Staff Bamboleo', 5, time '19:30', time '20:30', 20)
-) as v(title, rhythm, level, instructor, day_of_week, start_time, end_time, max_capacity)
+  ('Cha Cha Cha Pachanga · Intermedio',                  'Cha Cha Cha',   'general', null::text, 1, time '18:00', time '19:00', 20, 'Pasco 144 - 1er piso'),
+  ('Afro Cubano · Pre intermedio',                       'Afro Cubano',   'general', null, 1, time '19:00', time '20:00', 20, 'Pasco 144 - 1er piso'),
+  ('Salsa · Avanzados',                                  'Salsa',         'general', null, 1, time '20:00', time '21:00', 20, 'Pasco 144 - 1er piso'),
+  ('Salsa · Iniciación / Pre intermedio',                'Salsa',         'inicial', null, 2, time '19:00', time '20:00', 20, 'Catamarca 1515'),
+  ('Salsa · Intermedio',                                 'Salsa',         'general', null, 2, time '20:00', time '21:00', 20, 'Catamarca 1515'),
+  ('Vueltas en Pareja · Intermedio',                     'Salsa',         'general', null, 2, time '21:00', time '22:00', 20, 'Catamarca 1515'),
+  ('Mambo en 2 · Intermedio',                            'Mambo',         'general', null, 3, time '18:00', time '19:00', 20, 'Pasco 144 - 1er piso'),
+  ('Estilo Mujer · Intermedio / Avanzado',               'Estilo Mujer',  'general', null, 3, time '19:00', time '20:00', 20, 'Pasco 144 - 1er piso'),
+  ('Salsa · Avanzados',                                  'Salsa',         'general', null, 3, time '20:00', time '21:00', 20, 'Pasco 144 - 1er piso'),
+  ('Estilo Hombre Coreográfico · Intermedio / Avanzado', 'Estilo Hombre', 'general', null, 3, time '21:00', time '22:00', 20, 'Pasco 144 - 1er piso'),
+  ('Salsa · Iniciación / Pre intermedio',                'Salsa',         'inicial', null, 4, time '19:00', time '20:00', 20, 'Catamarca 1515'),
+  ('Salsa · Intermedio',                                 'Salsa',         'general', null, 4, time '20:00', time '21:00', 20, 'Catamarca 1515'),
+  ('Estilo Mujer Coreográfico · Avanzado',               'Estilo Mujer',  'general', null, 5, time '19:00', time '20:00', 20, 'Pasco 144 - 1er piso')
+) as v(title, rhythm, level, instructor, day_of_week, start_time, end_time, max_capacity, location)
 where not exists (select 1 from public.classes);
 
 -- ---------------------------------------------------------------------

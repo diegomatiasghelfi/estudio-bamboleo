@@ -10,7 +10,7 @@ type Draft = Omit<ClassItem, 'id'> & { id?: string }
 
 const empty: Draft = {
   title: '', rhythm: 'Salsa', level: 'general', instructor: '', day_of_week: 1,
-  start_time: '19:00', end_time: '20:00', max_capacity: 20, active: true,
+  start_time: '19:00', end_time: '20:00', max_capacity: 20, active: true, location: 'Pasco 144 - 1er piso',
 }
 
 export default function ClassesAdmin() {
@@ -36,7 +36,7 @@ export default function ClassesAdmin() {
     if (!draft) return
     setBusy(true)
     const { id, ...fields } = draft
-    const payload = { ...fields, instructor: fields.instructor || null }
+    const payload = { ...fields, instructor: fields.instructor || null, location: fields.location || null }
     const { error } = id ? await supabase.from('classes').update(payload).eq('id', id) : await supabase.from('classes').insert(payload)
     setBusy(false)
     if (error) return toast(errorMessage(error), 'error')
@@ -78,7 +78,9 @@ export default function ClassesAdmin() {
                 <Badge>Cupo {c.max_capacity}</Badge>
                 {!c.active && <Badge tone="red">Inactiva</Badge>}
               </div>
-              {c.instructor && <p className="mt-1 text-xs text-cocoa-400">Prof.: {c.instructor}</p>}
+              {(c.location || c.instructor) && (
+                <p className="mt-1 text-xs text-cocoa-400">{[c.location, c.instructor && `Prof.: ${c.instructor}`].filter(Boolean).join(' · ')}</p>
+              )}
             </div>
             <div className="flex shrink-0 gap-1">
               <button className="rounded-full p-2 hover:bg-cream-100" onClick={() => setDraft({ ...c, start_time: hhmm(c.start_time), end_time: hhmm(c.end_time) })} aria-label="Editar"><Pencil className="h-4 w-4" /></button>
@@ -108,6 +110,14 @@ export default function ClassesAdmin() {
                   <option value="inicial">Nivel Inicial</option>
                 </select>
               </div>
+            </div>
+            <div>
+              <label className="label">Sede</label>
+              <input className="input" list="sedes" value={draft.location ?? ''} onChange={(e) => set('location', e.target.value)} />
+              <datalist id="sedes">
+                <option value="Pasco 144 - 1er piso" />
+                <option value="Catamarca 1515" />
+              </datalist>
             </div>
             <div>
               <label className="label">Profesor/a</label>

@@ -46,6 +46,7 @@ export interface ClassItem {
   end_time: string
   max_capacity: number
   active: boolean
+  location: string | null
 }
 
 export interface Booking {

@@ -11,6 +11,7 @@ import Classes from './pages/student/Classes'
 import MyBookings from './pages/student/MyBookings'
 import Shop from './pages/student/Shop'
 import Checkout from './pages/student/Checkout'
+import Profile from './pages/student/Profile'
 import AdminHome from './pages/admin/AdminHome'
 
 function ProtectedRoutes() {
@@ -25,6 +26,7 @@ function ProtectedRoutes() {
         <Route path="reservas" element={<MyBookings />} />
         <Route path="tienda" element={<Shop />} />
         <Route path="tienda/:packId" element={<Checkout />} />
+        <Route path="perfil" element={<Profile />} />
         <Route path="admin/*" element={isAdmin ? <AdminHome /> : profile ? <Navigate to="/" replace /> : <PageLoader />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
