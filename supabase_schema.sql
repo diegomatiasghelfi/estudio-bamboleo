@@ -580,6 +580,12 @@ select v.* from (values
 ) as v(title, image_url, sort_order)
 where not exists (select 1 from public.news);
 
+-- Permisos de tabla para usuarios logueados (RLS sigue filtrando cada fila).
+-- Los proyectos nuevos de Supabase no los otorgan solos.
+grant usage on schema public to anon, authenticated;
+grant select, insert, update, delete on all tables in schema public to authenticated;
+alter default privileges in schema public grant select, insert, update, delete on tables to authenticated;
+
 -- ---------------------------------------------------------------------
 -- 7. CREAR TU USUARIO ADMIN
 --    1) Registrate en la app con tu email.
