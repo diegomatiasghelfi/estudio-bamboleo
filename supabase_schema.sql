@@ -544,6 +544,43 @@ select v.* from (values
 where not exists (select 1 from public.classes);
 
 -- ---------------------------------------------------------------------
+-- NOVEDADES (flyers del carrusel de Inicio) + bucket público "flyers"
+-- ---------------------------------------------------------------------
+create table if not exists public.news (
+  id          uuid primary key default gen_random_uuid(),
+  title       text not null default '',
+  image_url   text not null,
+  link        text,
+  active      boolean not null default true,
+  sort_order  int not null default 0,
+  created_at  timestamptz not null default now()
+);
+alter table public.news enable row level security;
+drop policy if exists "news_select" on public.news;
+create policy "news_select" on public.news for select to authenticated using (active or public.is_admin());
+drop policy if exists "news_admin_all" on public.news;
+create policy "news_admin_all" on public.news for all to authenticated using (public.is_admin()) with check (public.is_admin());
+
+insert into storage.buckets (id, name, public) values ('flyers', 'flyers', true)
+on conflict (id) do nothing;
+drop policy if exists "flyers_public_read" on storage.objects;
+create policy "flyers_public_read" on storage.objects for select using (bucket_id = 'flyers');
+drop policy if exists "flyers_admin_insert" on storage.objects;
+create policy "flyers_admin_insert" on storage.objects for insert to authenticated with check (bucket_id = 'flyers' and public.is_admin());
+drop policy if exists "flyers_admin_update" on storage.objects;
+create policy "flyers_admin_update" on storage.objects for update to authenticated using (bucket_id = 'flyers' and public.is_admin());
+drop policy if exists "flyers_admin_delete" on storage.objects;
+create policy "flyers_admin_delete" on storage.objects for delete to authenticated using (bucket_id = 'flyers' and public.is_admin());
+
+insert into public.news (title, image_url, sort_order)
+select v.* from (values
+  ('Vueltas en pareja estilo lineal y cubano · Miércoles 21 y 28 de enero 20hs', '/flyers/vueltas-en-pareja.jpg', 1),
+  ('Muestra anual + social · Viernes 4 de diciembre', '/flyers/muestra-anual.jpg', 2),
+  ('Bachata dominicana y merengue desde cero', '/flyers/bachata-merengue.jpg', 3)
+) as v(title, image_url, sort_order)
+where not exists (select 1 from public.news);
+
+-- ---------------------------------------------------------------------
 -- 7. CREAR TU USUARIO ADMIN
 --    1) Registrate en la app con tu email.
 --    2) Ejecutá esta línea reemplazando el email:

@@ -8,6 +8,7 @@ import type { Booking, PaymentRequest, UserPass } from '../../lib/types'
 import { DAY_NAMES, formatDate, fromISODate, hhmm, levelLabel, toISODate } from '../../lib/format'
 import { Badge, PageLoader } from '../../components/ui'
 import InstallApp from '../../components/InstallApp'
+import NewsCarousel from '../../components/NewsCarousel'
 
 export default function Dashboard() {
   const { profile, session } = useAuth()
@@ -96,6 +97,8 @@ export default function Dashboard() {
           <ShoppingBag className="h-4 w-4" /> Comprar / Renovar Pases
         </Link>
       </section>
+
+      <NewsCarousel />
 
       <div className="flex gap-3 rounded-2xl border border-gold-dark/50 bg-gold/30 p-4 text-sm">
         <Info className="mt-0.5 h-5 w-5 shrink-0" />

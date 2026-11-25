@@ -73,3 +73,13 @@ export interface PaymentRequest {
   packs?: Pick<Pack, 'name' | 'credits'> | null
   profiles?: Pick<Profile, 'full_name' | 'phone'> | null
 }
+
+export interface NewsItem {
+  id: string
+  title: string
+  image_url: string
+  link: string | null
+  active: boolean
+  sort_order: number
+  created_at: string
+}

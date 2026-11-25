@@ -1,11 +1,12 @@
 import { NavLink, Navigate, Route, Routes } from 'react-router-dom'
-import { CalendarCog, ClipboardCheck, Inbox, Tags, UserPlus } from 'lucide-react'
+import { CalendarCog, ClipboardCheck, Inbox, Megaphone, Tags, UserPlus } from 'lucide-react'
 import { PageTitle } from '../../components/ui'
 import Payments from './Payments'
 import ManualCredit from './ManualCredit'
 import CheckIn from './CheckIn'
 import ClassesAdmin from './ClassesAdmin'
 import PacksAdmin from './PacksAdmin'
+import NewsAdmin from './NewsAdmin'
 
 const tabs = [
   { to: 'pagos', label: 'Pagos', icon: Inbox },
@@ -13,6 +14,7 @@ const tabs = [
   { to: 'checkin', label: 'Check-in', icon: ClipboardCheck },
   { to: 'clases', label: 'Clases', icon: CalendarCog },
   { to: 'precios', label: 'Precios', icon: Tags },
+  { to: 'novedades', label: 'Novedades', icon: Megaphone },
 ]
 
 export default function AdminHome() {
@@ -33,6 +35,7 @@ export default function AdminHome() {
         <Route path="checkin" element={<CheckIn />} />
         <Route path="clases" element={<ClassesAdmin />} />
         <Route path="precios" element={<PacksAdmin />} />
+        <Route path="novedades" element={<NewsAdmin />} />
         <Route path="*" element={<Navigate to="pagos" replace />} />
       </Routes>
     </div>
