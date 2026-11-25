@@ -1,3 +1,4 @@
+import Avatar from './Avatar'
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { CalendarDays, Home, ShieldCheck, ShoppingBag, Ticket } from 'lucide-react'
 import WhatsAppButton from './WhatsAppButton'
@@ -15,7 +16,6 @@ export default function Layout() {
   const location = useLocation()
   const nav = isAdmin ? [...studentNav, { to: '/admin', label: 'Admin', icon: ShieldCheck }] : studentNav
   const firstName = profile?.full_name?.split(' ')[0]
-  const initials = (profile?.full_name || session?.user.email || '?').split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase()
 
   return (
     <div className="mx-auto flex min-h-[100dvh] max-w-xl flex-col">
@@ -26,8 +26,8 @@ export default function Layout() {
           </NavLink>
           <div className="flex items-center gap-2">
             {firstName && <span className="text-sm text-cocoa-600">Hola, <b className="font-semibold">{firstName}</b></span>}
-            <NavLink to="/perfil" className="flex h-9 w-9 items-center justify-center rounded-full bg-gold text-sm font-semibold ring-2 ring-white" aria-label="Mi perfil" title="Mi perfil">
-              {initials}
+            <NavLink to="/perfil" className="rounded-full ring-2 ring-white" aria-label="Mi perfil" title="Mi perfil">
+              <Avatar profile={profile} email={session?.user.email} />
             </NavLink>
           </div>
         </div>

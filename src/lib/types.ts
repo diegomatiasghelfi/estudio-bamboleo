@@ -7,6 +7,7 @@ export interface Profile {
   full_name: string | null
   phone: string | null
   role: Role
+  avatar_url?: string | null
   created_at: string
 }
 

@@ -1,5 +1,5 @@
-import { useEffect, useState, type FormEvent } from 'react'
-import { CalendarDays, LogOut, MapPin, MessageCircle, Pencil, Wallet } from 'lucide-react'
+import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from 'react'
+import { Camera, CalendarDays, LogOut, MapPin, MessageCircle, Pencil, Wallet } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { useToast } from '../../context/ToastContext'
 import { supabase, errorMessage } from '../../lib/supabase'
@@ -8,6 +8,7 @@ import type { UserPass } from '../../lib/types'
 import { formatDate, levelLabel } from '../../lib/format'
 import { Badge, PageLoader, PageTitle, Spinner } from '../../components/ui'
 import InstallApp from '../../components/InstallApp'
+import Avatar, { squareJpeg } from '../../components/Avatar'
 
 function passState(p: UserPass): { label: string; tone: 'green' | 'red' | 'neutral' } {
   const expired = new Date(p.expires_at).getTime() < Date.now()
@@ -26,6 +27,8 @@ export default function Profile() {
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
   const [busy, setBusy] = useState(false)
+  const [uploading, setUploading] = useState(false)
+  const fileInput = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     supabase
@@ -56,12 +59,32 @@ export default function Profile() {
     toast('Datos actualizados')
   }
 
-  const initials = (profile?.full_name || session?.user.email || '?')
-    .split(' ')
-    .map((w) => w[0])
-    .slice(0, 2)
-    .join('')
-    .toUpperCase()
+  async function onPhoto(e: ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    if (!file) return
+    if (!file.type.startsWith('image/')) return toast('Elegí una imagen', 'error')
+    setUploading(true)
+    try {
+      const blob = await squareJpeg(file)
+      const uid = session!.user.id
+      const path = `${uid}/avatar-${Date.now()}.jpg`
+      const up = await supabase.storage.from('avatars').upload(path, blob, { contentType: 'image/jpeg', upsert: true })
+      if (up.error) throw up.error
+      const url = supabase.storage.from('avatars').getPublicUrl(path).data.publicUrl
+      const { error } = await supabase.from('profiles').update({ avatar_url: url }).eq('id', uid)
+      if (error) throw error
+      // Borra fotos anteriores
+      const old = profile?.avatar_url?.split('/avatars/')[1]
+      if (old && old !== path) await supabase.storage.from('avatars').remove([old])
+      await refreshProfile()
+      toast('Foto actualizada')
+    } catch (err) {
+      toast(errorMessage(err), 'error')
+    } finally {
+      setUploading(false)
+    }
+  }
 
   return (
     <div className="space-y-6">
@@ -69,7 +92,19 @@ export default function Profile() {
 
       <section className="card p-5">
         <div className="flex items-center gap-4">
-          <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-gold font-serif text-2xl font-semibold">{initials}</div>
+          <button
+            type="button"
+            onClick={() => fileInput.current?.click()}
+            disabled={uploading}
+            className="relative shrink-0 rounded-full"
+            aria-label="Cambiar foto de perfil"
+          >
+            <Avatar profile={profile} email={session?.user.email} className="h-20 w-20 font-serif text-2xl" />
+            <span className="absolute -bottom-0.5 -right-0.5 flex h-7 w-7 items-center justify-center rounded-full bg-cocoa text-cream ring-2 ring-white">
+              {uploading ? <Spinner className="h-3.5 w-3.5 text-cream" /> : <Camera className="h-3.5 w-3.5" />}
+            </span>
+          </button>
+          <input ref={fileInput} type="file" accept="image/*" className="hidden" onChange={onPhoto} />
           <div className="min-w-0 flex-1">
             <p className="truncate font-serif text-xl font-semibold">{profile?.full_name || 'Sin nombre'}</p>
             <p className="truncate text-sm text-cocoa-400">{session?.user.email}</p>

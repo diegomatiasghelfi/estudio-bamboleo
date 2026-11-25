@@ -35,26 +35,28 @@ export default function MyBookings() {
     void load()
   }, [load])
 
+  const cancelDeadline = (b: Booking) => {
+    const d = new Date(classStart(b.class_date, b.classes!.start_time).getTime() - 3600000)
+    return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
+  }
   const hoursLeft = (b: Booking) => (classStart(b.class_date, b.classes!.start_time).getTime() - Date.now()) / 3600000
 
   async function confirmCancel() {
     if (!toCancel) return
     setBusy(true)
-    const { data, error } = await supabase.rpc('cancel_booking', { p_booking_id: toCancel.id })
+    const { error } = await supabase.rpc('cancel_booking', { p_booking_id: toCancel.id })
     setBusy(false)
     setToCancel(null)
     if (error) return toast(errorMessage(error), 'error')
-    toast((data as { refunded: boolean })?.refunded ? 'Reserva cancelada. Te devolvimos el pase.' : 'Reserva cancelada. El pase no se devolvió (menos de 2 h).')
+    toast('Reserva cancelada. Te devolvimos el pase.')
     void load()
   }
 
   if (loading) return <PageLoader />
 
-  const late = toCancel ? hoursLeft(toCancel) <= 2 : false
-
   return (
     <div>
-      <PageTitle title="Mis reservas" subtitle="Podés cancelar hasta 2 horas antes y recuperar tu pase." />
+      <PageTitle title="Mis reservas" subtitle="Podés cancelar hasta 1 hora antes de la clase y recuperás tu pase." />
       {bookings.length === 0 ? (
         <EmptyState
           icon={<CalendarCheck className="h-6 w-6" />}
@@ -67,7 +69,7 @@ export default function MyBookings() {
           {bookings.map((b) => {
             const d = fromISODate(b.class_date)
             const started = hoursLeft(b) <= 0
-            const lateWindow = hoursLeft(b) <= 2
+            const canCancel = hoursLeft(b) >= 1
             return (
               <article key={b.id} className="card flex gap-4 p-4">
                 <div className="flex h-16 w-14 shrink-0 flex-col items-center justify-center rounded-2xl bg-gold">
@@ -87,8 +89,16 @@ export default function MyBookings() {
                   </p>
                   {b.status === 'confirmed' && !started && (
                     <div className="mt-3 flex items-center justify-between gap-2">
-                      {lateWindow ? <span className="text-xs font-semibold text-brick">Faltan menos de 2 h</span> : <span />}
-                      <button className="btn-danger px-4 py-2" onClick={() => setToCancel(b)}>Cancelar</button>
+                      {canCancel ? (
+                        <>
+                          <span className="text-xs text-cocoa-400">Cancelable hasta las {hhmm(cancelDeadline(b))}</span>
+                          <button className="btn-danger px-4 py-2" onClick={() => setToCancel(b)}>Cancelar</button>
+                        </>
+                      ) : (
+                        <span className="flex items-center gap-1.5 text-xs font-semibold text-brick">
+                          <AlertTriangle className="h-3.5 w-3.5" /> Ya no se puede cancelar (falta menos de 1 hora)
+                        </span>
+                      )}
                     </div>
                   )}
                 </div>
@@ -104,21 +114,12 @@ export default function MyBookings() {
             <p className="text-sm">
               ¿Querés cancelar <b>{toCancel.classes!.title}</b> del {formatDate(toCancel.class_date)} a las {hhmm(toCancel.classes!.start_time)}?
             </p>
-            {late ? (
-              <div className="flex gap-3 rounded-xl bg-red-50 p-3 text-sm text-brick">
-                <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0" />
-                <p>
-                  <b>Faltan menos de 2 horas</b> para el inicio de la clase. Si cancelás ahora <b>vas a perder el pase</b> (no se devuelve).
-                </p>
-              </div>
-            ) : (
-              <p className="rounded-xl bg-emerald-50 p-3 text-sm text-emerald-700">Como faltan más de 2 horas, te devolvemos el pase a tu pack.</p>
-            )}
+            <p className="rounded-xl bg-emerald-50 p-3 text-sm text-emerald-700">Te devolvemos el pase a tu pack.</p>
             <div className="grid grid-cols-2 gap-3">
               <button className="btn-ghost" onClick={() => setToCancel(null)} disabled={busy}>Volver</button>
-              <button className={late ? 'btn bg-brick text-white' : 'btn-primary'} onClick={confirmCancel} disabled={busy}>
+              <button className="btn-primary" onClick={confirmCancel} disabled={busy}>
                 {busy && <Spinner className="h-4 w-4 text-cream" />}
-                {late ? 'Cancelar igual' : 'Sí, cancelar'}
+                Sí, cancelar
               </button>
             </div>
           </div>

@@ -58,6 +58,7 @@ create table if not exists public.classes (
   check (end_time > start_time)
 );
 alter table public.classes add column if not exists location text;
+alter table public.profiles add column if not exists avatar_url text;
 
 create table if not exists public.bookings (
   id            uuid primary key default gen_random_uuid(),
@@ -286,13 +287,17 @@ begin
   select * into v_class from public.classes where id = v_booking.class_id;
   v_start := (v_booking.class_date + v_class.start_time) at time zone 'America/Argentina/Buenos_Aires';
 
-  if v_start - now() > interval '2 hours' then
-    v_refund := true;
-    update public.user_passes
-       set remaining_credits = least(remaining_credits + 1, total_credits),
-           status = case when status = 'exhausted' then 'active' else status end
-     where id = v_booking.user_pass_id;
+  -- Los alumnos pueden cancelar hasta 1 hora antes del inicio; después ya no.
+  -- El admin puede cancelar siempre. Al cancelar se devuelve el pase.
+  if v_start - now() < interval '1 hour' and not public.is_admin() then
+    raise exception 'Solo podés cancelar hasta 1 hora antes de la clase';
   end if;
+
+  v_refund := true;
+  update public.user_passes
+     set remaining_credits = least(remaining_credits + 1, total_credits),
+         status = case when status = 'exhausted' then 'active' else status end
+   where id = v_booking.user_pass_id;
 
   update public.bookings set status = 'cancelled' where id = p_booking_id;
 
@@ -579,6 +584,23 @@ select v.* from (values
   ('Bachata dominicana y merengue desde cero', '/flyers/bachata-merengue.jpg', 3)
 ) as v(title, image_url, sort_order)
 where not exists (select 1 from public.news);
+
+-- ---------------------------------------------------------------------
+-- FOTOS DE PERFIL: bucket público "avatars", cada usuario en su carpeta <uid>/
+-- ---------------------------------------------------------------------
+insert into storage.buckets (id, name, public) values ('avatars', 'avatars', true)
+on conflict (id) do nothing;
+drop policy if exists "avatars_public_read" on storage.objects;
+create policy "avatars_public_read" on storage.objects for select using (bucket_id = 'avatars');
+drop policy if exists "avatars_own_insert" on storage.objects;
+create policy "avatars_own_insert" on storage.objects for insert to authenticated
+  with check (bucket_id = 'avatars' and (storage.foldername(name))[1] = auth.uid()::text);
+drop policy if exists "avatars_own_update" on storage.objects;
+create policy "avatars_own_update" on storage.objects for update to authenticated
+  using (bucket_id = 'avatars' and (storage.foldername(name))[1] = auth.uid()::text);
+drop policy if exists "avatars_own_delete" on storage.objects;
+create policy "avatars_own_delete" on storage.objects for delete to authenticated
+  using (bucket_id = 'avatars' and (storage.foldername(name))[1] = auth.uid()::text);
 
 -- Permisos de tabla para usuarios logueados (RLS sigue filtrando cada fila).
 -- Los proyectos nuevos de Supabase no los otorgan solos.
