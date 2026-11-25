@@ -28,3 +28,5 @@ Importá el repositorio en Vercel (framework: Vite) y cargá las variables
 | Pase Libre | 48 | $160.000 |
 
 Alias de transferencia: `ESTUDIO.BAMBOLEO`. Los precios y el alias se editan desde Admin → Precios.
+
+Producción: desplegado en Vercel (proyecto `estudio-bamboleo`), se actualiza con cada push a `main`.
